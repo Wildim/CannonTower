@@ -9,20 +9,25 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
     pygame.display.set_caption('Cannon Tower')
+
     pygame.mouse.set_visible(0)
 
     # Fill background
     background = pygame.Surface(screen.get_size())
     background = background.convert()
-    background.fill((0, 0 , 0))
+    background.fill((0, 0, 0))
 
+    scoreboard = Scoreboard()
     aim = Aim()
-    cannonball = Cannonball((0, 0))
+    cannonball = Cannonball()
+    ballon = Ballon()
 
-    allsprites = pygame.sprite.RenderPlain(aim, cannonball)
+    allsprites = pygame.sprite.RenderPlain(scoreboard, aim, cannonball, ballon)
 
     screen.blit(background, (0, 0))
     pygame.display.flip()
+
+    shootcount = 0
 
     clock = pygame.time.Clock()
 
@@ -30,7 +35,7 @@ def main():
 
     # Event loop
     while mainloop:
-        clock.tick(60)
+        clock.tick(50)
 
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -40,7 +45,16 @@ def main():
                     mainloop = False
             if event.type == MOUSEBUTTONDOWN:
                 target = pygame.mouse.get_pos()
-                cannonball.fly(target)
+                cannonball.shoot(target)
+
+        if not screen.get_rect().contains(cannonball.rect):
+                cannonball.default()
+                scoreboard.inc_miss()
+
+        if cannonball.rect.colliderect(ballon):
+            cannonball.default()
+            ballon.default()
+            scoreboard.inc_hit()
 
         allsprites.update()
         screen.blit(background, (0, 0))
